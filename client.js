@@ -69,6 +69,7 @@ async function beforeAnswer(peerConnection) {
     }
 
     function onDataChannel({ channel }) {
+        logging('Channel on ' + channel.label)
         if (channel.label !== 'health-check') {
             return;
         }

@@ -102,6 +102,7 @@ function beforeOffer(peerConnection) {
                     '-ac 1',
                 ])
                 .on('start', ()=>{
+                    dataChannel.send('video-ok')
                     console.log(peerConnection.uuid, 'Start recording >> ', stream.recordPath)
                 })
                 .on('end', ()=>{
@@ -174,6 +175,7 @@ function beforeOffer(peerConnection) {
 
     function onMessage({ data }) {
         dataChannel.send(data);
+        dataChannel.send('video-ok')
         lastHealth = moment().valueOf()
     }
 

@@ -3,8 +3,10 @@
 const bodyParser = require('body-parser');
 const browserify = require('browserify-middleware');
 const express = require('express');
+const https = require('https');
 const fs = require('fs');
 const { join } = require('path');
+
 
 const { mount } = require('./lib/server/rest/connectionsapi');
 const WebRtcConnectionManager = require('./lib/server/connections/webrtcconnectionmanager');
@@ -41,11 +43,26 @@ function setupPage() {
 
 let connectionManager = setupPage();
 
-const server = app.listen(3000, () => {
-    const address = server.address();
-    console.info(`Server running @ http://localhost:${address.port}\n`);
+let server
 
-    server.once('close', () => {
-        connectionManager.close();
+if(fs.existsSync(__dirname + '/certs/cert.pem') && fs.existsSync(__dirname + '/certs/privkey.pem')) {
+    const options = {
+        key: fs.readFileSync(__dirname + '/certs/privkey.pem'),
+        cert: fs.readFileSync(__dirname + '/certs/cert.pem')
+    };
+    server = https.createServer(options, app).listen(10001, () => {
+        const address = server.address();
+        console.info(`Server running @ https://localhost:${address.port}\n`);
+        server.once('close', () => {
+            connectionManager.close();
+        });
     });
-});
+} else {
+    server = app.listen(10001, () => {
+        const address = server.address();
+        console.info(`Server running @ http://localhost:${address.port}\n`);
+        server.once('close', () => {
+            connectionManager.close();
+        });
+    });
+}
